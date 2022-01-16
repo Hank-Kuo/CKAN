@@ -1,0 +1,17 @@
+{
+    "dataset": "movie",
+    "learning_rate": 0.02,
+    "batch_size": 1024,
+    
+    "dim": 16,
+    "n_hop": 2,
+    
+    "kge_weight": 1e-2,
+    "l2_weight": 1e-5,
+    "l2_weight_1": 1e-4,
+    "l2_weight_2": 1e-5,
+     
+    "epochs": 20,
+    "valid_every": 1,
+    "patience": 5
+}
