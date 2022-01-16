@@ -24,7 +24,7 @@ parser.add_argument("--restore", default=None, help="Optional, name of the file 
 
 def get_model(params, model_type):
     model = {
-        'base_model': net.Net(params),
+        'base_model': net.CKAN(params),
     }
 
     return model[model_type]

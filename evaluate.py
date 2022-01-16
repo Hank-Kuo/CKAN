@@ -19,17 +19,11 @@ def evaluation(params, model, data_generator):
     acc_list = []
     f1_list = []
     model.eval()
-
-    for users, items, labels, memories_h, memories_r,memories_t, memories_neg_t in data_generator:
-
+    for users, items, labels, user_triplets, item_triplets in data_generator:
         items = items.to(params.device)
         labels = labels.to(params.device)
-        memories_h = memories_h.permute(1, 0, 2).to(params.device)
-        memories_r = memories_r.permute(1, 0, 2).to(params.device)
-        memories_t = memories_t.permute(1, 0, 2).to(params.device)
-        memories_neg_t = memories_neg_t.permute(1, 0, 2).to(params.device)
-        
-        return_dict, _ = model(items, labels, memories_h, memories_r, memories_t, memories_neg_t)
+        return_dict, _ = model(items, labels, user_triplets, item_triplets)
+
         scores = return_dict["scores"].detach().cpu().numpy()
         labels = labels.cpu().numpy()
         auc = roc_auc_score(y_true=labels, y_score=scores)
