@@ -1,6 +1,6 @@
 {
     "dataset": "satori",
-    "learning_rate": 0.02,
+    "learning_rate": 0.002,
     "batch_size": 1024,
     
     "dim": 16,

@@ -20,7 +20,6 @@ class CKAN(nn.Module):
         
         
     def _init_weight(self):
-        # init embedding
         self.entity_emb = nn.Embedding(self.n_entity+1, self.dim)
         self.relation_emb = nn.Embedding(self.n_relation+1, self.dim)
         self.attention = nn.Sequential(
