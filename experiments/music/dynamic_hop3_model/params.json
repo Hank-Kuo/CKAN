@@ -1,0 +1,17 @@
+{
+    "dataset": "music",
+    "learning_rate": 0.02,
+    "batch_size": 1024,
+    
+    "dim": 16,
+    "n_hop": 3,
+    "l2_weight": 1e-7,
+
+    "history_item": 10,
+    "sample_triplet": 5,
+     
+    "epochs": 150,
+    "valid_every": 1,
+    "ripple_update": 20,
+    "patience": 5
+}

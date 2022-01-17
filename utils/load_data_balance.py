@@ -6,9 +6,10 @@ import logging
 
 def load_data(args):
     logging.info("================== preparing data ===================")
-    max_user_history_item = 32
+    max_user_history_item = args.history_item* args.sample_triplet
     train_data, test_data, user_init_entity_set, item_init_entity_set = load_rating(args)
     n_entity, n_relation, kg = load_kg(args)
+    
     logging.info("contructing users' kg triple sets ...")
     user_triple_sets = kg_propagation(args, kg, user_init_entity_set, max_user_history_item, True)
     logging.info("contructing items' kg triple sets ...")
@@ -28,57 +29,49 @@ def load_rating(args):
     return dataset_split(rating_np)
 
 
-def dataset_split(rating_np):
-    logging.info("splitting dataset to 6:2:2 ...")
-    train_ratio = 0.6
-    test_ratio = 0.2
-    n_ratings = rating_np.shape[0]
+def dataset_split(args, rating_np):
+    # 處理 user history item 
+    k = pd.DataFrame(rating_np, columns=['user', 'item', 'label'])
+    value_counts = k[k['label']==1]['user'].value_counts()
+    to_remove = value_counts[value_counts <= args.history_item].index
+    df = k[~k['user'].isin(to_remove)]
+    user_history = df[df['label']==1].groupby('user').apply(lambda x: x.sample(args.history_item,random_state=555))
+    user_history_id = [y for x, y in user_history.index.tolist()]
+    df = df.drop(user_history_id)
 
-    train_indices = np.random.choice(n_ratings, size=int(n_ratings * train_ratio), replace=False)
-    left = set(range(n_ratings)) - set(train_indices)
-    test_indices = np.random.choice(list(left), size=int(n_ratings * test_ratio), replace=False)
-    user_history_indices = list(left - set(test_indices))
-    
-    user_init_entity_set, item_init_entity_set = collaboration_propagation(rating_np, user_history_indices)
-    
-    train_indices = [i for i in train_indices if rating_np[i][0] in user_init_entity_set.keys()]
-    test_indices = [i for i in test_indices if rating_np[i][0] in user_init_entity_set.keys()]
-
-    train_data = rating_np[train_indices]
-    test_data = rating_np[test_indices]
-    
-    return train_data, test_data, user_init_entity_set, item_init_entity_set
-    
-    
-def collaboration_propagation(rating_np, user_history_indices):
-    logging.info("contructing users' initial entity set ...")
-    user_history_item_dict = dict()
-    item_history_user_dict = dict()
+    user_history_dict = dict()
     item_neighbor_item_dict = dict()
-    for i in user_history_indices:
-        user = rating_np[i][0]
-        item = rating_np[i][1]
-        rating = rating_np[i][2]
-        if rating == 1:
-            if user not in user_history_item_dict:
-                user_history_item_dict[user] = []
-            user_history_item_dict[user].append(item)
-            if item not in item_history_user_dict:
-                item_history_user_dict[item] = []
-            item_history_user_dict[item].append(user)
+    item_history_dict = dict()
+    # user history  -> user 多少 seed 與 item 多少 seed
+    for i, u in enumerate(list(set(user_history['user'].tolist()))):
         
-    for item in item_history_user_dict.keys():
+        sub = user_history[user_history['user']==u]['item'].tolist()
+
+        if u not in user_history_dict:
+            user_history_dict[u] = []
+        user_history_dict[u].extend(sub)
+
+        for item in sub:
+            if item not in item_history_dict:
+                item_history_dict[item] = []
+            item_history_dict[item].extend(u)
+
+    # 拿到 user neibhbor 的 item
+    for item in item_history_dict.keys():
         item_nerghbor_item = []
-        for user in item_history_user_dict[item]:
-            item_nerghbor_item = np.concatenate((item_nerghbor_item, user_history_item_dict[user]))
+        for user in item_history_dict[item]:
+            item_nerghbor_item = np.concatenate((item_nerghbor_item, user_history_dict[user]))
         item_neighbor_item_dict[item] = list(set(item_nerghbor_item))
 
-    item_list = set(rating_np[:, 1])
+    item_list = set(df['item'].tolist())
     for item in item_list:
         if item not in item_neighbor_item_dict:
             item_neighbor_item_dict[item] = [item]
-    return user_history_item_dict, item_neighbor_item_dict
 
+    train_data, test_data = train_test_split(df.to_numpy(), train_size=0.8, random_state=42)
+
+    return train_data, test_data, user_history_dict, item_neighbor_item_dict
+    
 
 def load_kg(args):
     kg_file = './data/' + args.dataset + '/kg_final'
@@ -114,17 +107,35 @@ def kg_propagation(args, kg, init_entity_set, set_size, is_user):
                 entities = triple_sets[obj][-1][2]
 
             for entity in entities:
-                for tail_and_relation in kg[entity]:
-                    h.append(entity)
-                    t.append(tail_and_relation[0])
-                    r.append(tail_and_relation[1])
+                triplets = kg[entity]
+                if len(triplets) < args.sample_triplet:
+                    sample_triplets = triplets
+                else:
+                    random.seed(555)
+                    sample_triplets = random.sample(triplets, args.sample_triplet)
+                
+                for tail_and_relation in sample_triplets:
+                    memories_h.append(entity)
+                    memories_r.append(tail_and_relation[1])
+                    memories_t.append(tail_and_relation[0])
+                
                     
             if len(h) == 0:
                 triple_sets[obj].append(([0]*set_size, [0]*set_size, [0]*set_size))
             else:
-                indices = np.random.choice(len(h), size=set_size, replace= (len(h) < set_size))
-                h = [h[i] for i in indices]
-                r = [r[i] for i in indices]
-                t = [t[i] for i in indices]
+                replace = len(h) > set_size
+                if replace == True:
+                    np.random.seed(555)
+                    indices = np.random.choice(len(h), size=set_size, replace=False)
+                else:
+                    np.random.seed(555)
+                    indices = np.random.choice(len(h), size=len(h), replace=False)
+                
+                # padding 
+                l = max(0, set_size - len(h))
+                h = [h[i] for i in indices] + [0]*l
+                r = [r[i] for i in indices] + [0]*l
+                t = [t[i] for i in indices] + [0]*l
+
                 triple_sets[obj].append((h, r, t))
     return triple_sets

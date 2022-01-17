@@ -53,7 +53,7 @@ def main():
     
     # load dataset
     print("===> Loading datasets")
-    train_data, test_data, n_entity, n_relation, user_triple_sets, item_triple_sets = load_data.load_data(params)
+    train_data, test_data, n_entity, n_relation, max_user_history_item, user_triple_sets, item_triple_sets = load_data.load_data(params)
     params.n_entity = n_entity
     params.n_relation = n_relation
 
@@ -68,7 +68,12 @@ def main():
     model = get_model(params, args.model_type)
 
     model = model.to(params.device)
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), params.learning_rate)
+
+    optimizer = torch.optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()),
+        lr = params.learning_rate,
+        weight_decay = params.l2_weight,
+    )
     tb = tensorboard.Tensorboard(args.model_dir, False)
     writer = tb.create_writer()
     

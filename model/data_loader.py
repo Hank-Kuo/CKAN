@@ -25,7 +25,7 @@ class Dataset(torch_data.Dataset):
             user_t.append(torch.LongTensor(self.user_triple_set[user][i][2]).to(self.params.device))
 
             item_h.append(torch.LongTensor(self.item_triple_set[items][i][0]).to(self.params.device))
-            item_r.append(torch.LongTensor(self.item_triple_set[items][i][0]).to(self.params.device))
-            item_t.append(torch.LongTensor(self.item_triple_set[items][i][0]).to(self.params.device))
+            item_r.append(torch.LongTensor(self.item_triple_set[items][i][1]).to(self.params.device))
+            item_t.append(torch.LongTensor(self.item_triple_set[items][i][2]).to(self.params.device))
 
         return user, items, labels, [user_h, user_r, user_t], [item_h, item_r, item_t]
