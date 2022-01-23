@@ -16,9 +16,9 @@ if __name__ == '__main__':
     
     
     folders = [   
-                {'dataset':'satori', 'model_dir':'hop2_model', 'model':'base_model', 'restore': None},
-                {'dataset':'wikidata','model_dir':'hop2_model', 'model':'base_model', 'restore': None},
-                {'dataset':'music','model_dir':'hop2_model', 'model':'base_model', 'restore': None},
+                #{'dataset':'satori', 'model_dir':'hop2_model', 'model':'base_model', 'restore': None},
+                #{'dataset':'wikidata','model_dir':'hop2_model', 'model':'base_model', 'restore': None},
+                #{'dataset':'music','model_dir':'hop2_model', 'model':'base_model', 'restore': None},
                 
                 #{'dataset':'satori','model_dir':'balance_hop2_model', 'model':'base_model', 'restore': None},
                 #{'dataset':'wikidata','model_dir':'balance_hop2_model', 'model':'base_model', 'restore': None},
@@ -44,9 +44,9 @@ if __name__ == '__main__':
                 #{'dataset':'wikidata','model_dir':'dynamic_hop4_model', 'model':'base_model', 'restore': None},
                 #{'dataset':'music','model_dir':'dynamic_hop4_model', 'model':'base_model', 'restore': None},
 
-                #{'dataset':'satori','model_dir':'dynamic_hop0_model', 'model':'HOP0_CKAN', 'restore': None},
-                #{'dataset':'wikidata','model_dir':'dynamic_hop0_model', 'model':'HOP0_CKAN', 'restore': None},
-                #{'dataset':'music','model_dir':'dynamic_hop0_model', 'model':'HOP0_CKAN', 'restore': None},
+                #{'dataset':'satori','model_dir':'dynamic_hop0_model', 'model':'hop0_model', 'restore': None},
+                #{'dataset':'wikidata','model_dir':'dynamic_hop0_model', 'model':'hop0_model', 'restore': None},
+                #{'dataset':'music','model_dir':'dynamic_hop0_model', 'model':'hop0_model', 'restore': None},
                 
     ]
     
