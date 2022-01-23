@@ -5,10 +5,10 @@
     
     "dim": 16,
     "n_hop": 2,
-    "l2_weight": 1e-7,
+    "l2_weight": 1e-5,
 
-    "history_item": 10,
-    "sample_triplet": 5,
+    "history_item": 8,
+    "sample_triplet": 4,
      
     "epochs": 150,
     "valid_every": 1,

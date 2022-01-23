@@ -7,7 +7,7 @@ import logging
 import model.net as net
 from evaluate import evaluation
 import model.data_loader as data_loader
-import utils.load_data_paper as load_data
+import utils.load_data_dynamic as load_data
 import utils.utils as utils
 import utils.tensorboard as tensorboard
 
